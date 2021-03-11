@@ -1,0 +1,19 @@
+{
+  "name": "mate",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "pixi.js": "^5.3.8",
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx webpack",
+    "start": "tsc --watch"
+  },
+  "author": "",
+  "license": "ISC"
+}
