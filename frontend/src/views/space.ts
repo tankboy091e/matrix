@@ -1,52 +1,101 @@
 import cell from "../components/cell";
+import simulacre from "../components/simulacre";
 import snake from "../components/snake";
 import { size } from "../util/mathf";
 import { canvas } from "./view";
 
+export enum borrowResponse {
+    success,
+    failed,
+    out,
+}
+
+export interface response {
+    cell : cell | null
+    response : borrowResponse
+}
 
 class space extends canvas {
     private static readonly luck = 0.99
+
     private cellSize: size
-    private children: Array<snake>
-    private lanes: Array<Array<snake>>
+    private chessBoard: Array<Array<cell>>
+    private lives : Array<simulacre>
+    private selectedCell : cell
 
     constructor() {
         super()
-        this.cellSize = { width: 14, height: 20 }
-        console.log(this.context.font)
         this.context.textBaseline = 'top'
-        this.children = new Array<snake>()
-
-        this.lanes = new Array<Array<snake>>()
-        for (let i = 0; i < this.stageWidth / this.cellSize.width; i++) {
-            this.lanes.push(new Array<snake>())
-        }
+        this.initializeChessBoard()
+        this.initializeLives()
         this.resize()
+
+        window.addEventListener('click', this.detect.bind(this))
     }
 
-    private initializeLane() {
-        if (!this.cellSize) {
+    protected initializeChessBoard() : void {
+        this.initializeCellSize()
+        this.chessBoard = new Array<Array<cell>>()
+        for (let i = 0; i < this.stageWidth / this.cellSize.width; i++) {
+            this.chessBoard[i] = new Array<cell>()
+            for (let j = 0; j < this.stageHeight / this.cellSize.height + 1; j ++) {
+                const child = new cell({
+                    size : this.cellSize,  
+                })
+                child.setCoord(i, j)
+                this.chessBoard[i][j] = child
+            }
+        }
+    }
+
+    protected initializeCellSize() : void {
+        if (this.cellSize) {
             return
         }
-        const delta = (this.stageWidth / this.cellSize.width) - this.lanes.length
-        if (delta < 0) {
-            for (let i = 0; i < -1 * delta; i++) {
-                this.lanes.pop()
-            }
-        }
-        if (delta > 0) {
-            for (let i = 0; i < delta; i++) {
-                this.lanes.push(new Array<snake>())
-            }
-        }
+        this.cellSize = { width: 14, height: 20 }
+    }
+
+    protected initializeLives() : void {
+        this.lives = new Array<simulacre>()
     }
 
     protected present(): void {
-        if (!this.children) {
+        if (!this.lives) {
             return
         }
-        for (let i = 0; i < this.children.length; i++) {
-            this.children[i].present(this.context)
+        for (let i = this.lives.length-1; i >= 0; i--) {
+            this.lives[i].present(this.context)
+        }
+    }
+
+    public borrowCell(x : number, y : number) : response {
+        if (!this.chessBoard) {
+            return {
+                cell : null,
+                response : borrowResponse.failed
+            }
+        }
+        if (x < 0  || this.chessBoard.length-1 < x || y < 0) {
+            return {
+                cell : null,
+                response : borrowResponse.failed
+            }
+        }
+        if (!this.chessBoard[x]) {
+            return {
+                cell : null,
+                response : borrowResponse.failed
+            }
+        }
+        if (this.chessBoard[x].length-1 < y) {
+            return {
+                cell : null,
+                response : borrowResponse.out
+            }
+        }
+        return {
+            cell : this.chessBoard[x][y],
+            response : borrowResponse.success
         }
     }
 
@@ -57,19 +106,27 @@ class space extends canvas {
     }
 
     protected born(): void {
-        const child = new snake({
-            length: 7,
-            size: this.cellSize,
+        const life = new snake({
+            horizon : this,
+            coord : {
+                x : Math.floor(this.chessBoard.length  * Math.random()),
+                y : 0
+            },
         })
-        const lane = Math.floor(Math.random() * this.lanes.length)
-        child.setCoord(lane, 0)
-        this.children.push(child)
-        this.lanes[lane].push(child)
+        this.lives.push(life)
     }
 
-    protected resize(): void {
+    protected detect(e : MouseEvent) : void {
+        
+    }
+
+    protected resize() : void {
         super.resize()
-        this.initializeLane()
+        this.initializeChessBoard()
+    }
+
+    public destroy(life : simulacre) :void {
+        this.lives.splice(this.lives.findIndex(x => x == life), 1)
     }
 }
 

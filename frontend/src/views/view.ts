@@ -20,7 +20,7 @@ abstract class canvas extends view {
     private lastDoubleUpdated : number;
     constructor() {
         super()
-        this.frameRate = 12;
+        this.frameRate = 24;
         this.lastUpdated = 0;
         this.lastDoubleUpdated = 0;
         this.initializeCanvas()
