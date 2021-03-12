@@ -1,3 +1,4 @@
+import book from "../components/book";
 import cell from "../components/cell";
 import simulacre from "../components/simulacre";
 import snake from "../components/snake";
@@ -28,8 +29,10 @@ class space extends canvas {
         this.context.textBaseline = 'top'
         this.initializeChessBoard()
         this.initializeLives()
+        
         this.resize()
 
+        document.body.style.cursor = 'pointer'
         window.addEventListener('click', this.detect.bind(this))
     }
 
@@ -117,7 +120,20 @@ class space extends canvas {
     }
 
     protected detect(e : MouseEvent) : void {
-        
+        this.lives.push(new book({
+            horizon : this,
+            coord : {
+                x : Math.floor(e.clientX / this.cellSize.width),
+                y : Math.floor(e.clientY / this.cellSize.height)
+            },
+            size : {
+                width : Math.floor(this.stageWidth * 0.4),
+                height : Math.floor(this.stageHeight * 0.9)
+            },
+            fontSize : this.cellSize
+        }
+        ))
+        document.body.style.cursor = 'default'
     }
 
     protected resize() : void {
