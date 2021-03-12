@@ -5,8 +5,8 @@ export interface cellArgs{
 }
 
 interface presentOption {
-    blink : boolean
-    opacity : number
+    blink? : boolean
+    opacity? : number
 }
 
 class cell {
@@ -33,7 +33,9 @@ class cell {
         }
         context.font = `${this.size.height}px consolas`
         context.fillStyle = option.blink ? '#FFFFFF' : '#03A062'
-        context.globalAlpha = option.opacity
+        if (option.opacity) {
+            context.globalAlpha = option.opacity
+        }
         context.fillText(Math.random().toString(36).charAt(2), this.coord.x * this.size.width, this.coord.y * this.size.height)
     }
 

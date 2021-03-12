@@ -11,8 +11,8 @@ class book extends simulacre {
     protected fontSize: size
     protected step: number;
     protected children: Array<Array<vector2>>
-
     protected axis: vector2
+    protected opened : boolean
 
     constructor(args: bookArgs) {
         super(args)
@@ -42,17 +42,20 @@ class book extends simulacre {
     }
 
     public present(context: CanvasRenderingContext2D): void {
-        let finished : boolean = false
         this.axis.y = 0
         for (let i = -1 * this.axis.x; i <= this.axis.x; i++) {
             const xindex = Math.floor(this.children.length * 0.5 + i)
             for (let j = -1 * this.axis.y; j <= this.axis.y; j++) {
                 const yindex = Math.floor(this.getChildRow(xindex).length * 0.5 + j)
-                const child = this.getChild(xindex, yindex)
-                this.horizon.borrowCell(child.x, child.y).cell?.present(context)
-                if (xindex == 0 && yindex == 0) {
-                    finished = true
+                if (xindex ===0 && yindex === 0) {
+                    this.opened = true
                 }
+                const child = this.getChild(xindex, yindex)
+                const blink = Math.abs(j) === this.axis.y
+                this.horizon.borrowCell(child.x, child.y).cell?.present(context, {
+                    blink : blink,
+                    opacity : 1
+                })
             }
             if (i < 0) {
                 this.axis.y ++
@@ -60,7 +63,7 @@ class book extends simulacre {
                 this.axis.y --
             }
         }
-        if (finished) {
+        if (this.opened) {
             return
         }
         this.axis.x++
